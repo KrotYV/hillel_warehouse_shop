@@ -1,0 +1,73 @@
+version: "3.9"
+
+services:
+  shop:
+    container_name: shop
+    build:
+      context: .
+      dockerfile: ./Docker/shop/Dockerfile
+    networks:
+      - net
+      - db-to-shop
+    depends_on:
+      - dbshop
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./shop/:/usr/app
+
+  warehouse:
+    container_name: warehouse
+    build:
+      context: .
+      dockerfile: ./Docker/warehouse/Dockerfile
+    networks:
+      - net
+      - db-to-warehouse
+    depends_on:
+      - dbwarehouse
+    ports:
+      - "8001:8001"
+    volumes:
+      - ./warehouse/:/usr/app
+
+  dbshop:
+    container_name: dbshop
+    image: postgres:latest
+    volumes:
+      - db_shop-vol:/var/lib/postgresql/data
+    networks:
+      - db-to-shop
+    expose:
+      - 5432
+    ports:
+      - "5433:5432"
+    environment:
+      POSTGRES_USER: 'postgres'
+      POSTGRES_PASSWORD: 'postgres'
+      POSTGRES_DB: 'shop_db'
+
+  dbwarehouse:
+    container_name: dbwarehouse
+    image: postgres:latest
+    volumes:
+      - db_warehouse-vol:/var/lib/postgresql/data
+    networks:
+      - db-to-warehouse
+    expose:
+      - 5432
+    ports:
+      - "5431:5432"
+    environment:
+      POSTGRES_USER: 'postgres1'
+      POSTGRES_PASSWORD: 'postgres1'
+      POSTGRES_DB: 'warehouse_db'
+
+networks:
+  net:
+  db-to-shop:
+  db-to-warehouse:
+
+volumes:
+  db_shop-vol:
+  db_warehouse-vol:
