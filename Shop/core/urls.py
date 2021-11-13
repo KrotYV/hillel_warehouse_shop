@@ -17,10 +17,9 @@ from django.contrib import admin
 from django.urls import include, path
 from django.views.generic import RedirectView
 
-# from .shop import views
-
 urlpatterns = [
-    path('', RedirectView.as_view(url='/shop/', permanent=True)),
-    path('shop/', include('shop.urls')),
+    path('', RedirectView.as_view(url='/books/', permanent=True)),
+    path('books/', include('books.urls')),
     path('admin/', admin.site.urls),
+    path('accounts/', include('django.contrib.auth.urls')),
 ]

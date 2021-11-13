@@ -1,16 +1,15 @@
 version: "3.9"
 
 services:
-  shop:
-    container_name: shop
+  web:
+    container_name: web
     build:
       context: .
-      dockerfile: ./Docker/shop/Dockerfile
+      dockerfile: docker/shop/Dockerfile
+    env_file:
+      - configs/shop.env
     networks:
-      - net
-      - db-to-shop
-    depends_on:
-      - dbshop
+      - webnet
     ports:
       - "8000:8000"
     volumes:
@@ -20,54 +19,59 @@ services:
     container_name: warehouse
     build:
       context: .
-      dockerfile: ./Docker/warehouse/Dockerfile
+      dockerfile: docker/warehouse/Dockerfile
+    env_file:
+      - configs/warehouse.env
     networks:
-      - net
-      - db-to-warehouse
-    depends_on:
-      - dbwarehouse
+      - warehouse_net
     ports:
       - "8001:8001"
     volumes:
       - ./warehouse/:/usr/app
 
-  dbshop:
-    container_name: dbshop
+  db:
+    container_name: db
     image: postgres:latest
     volumes:
-      - db_shop-vol:/var/lib/postgresql/data
+      - db-data:/var/lib/postgresql/data
     networks:
-      - db-to-shop
+      - webnet
     expose:
-      - 5432
-    ports:
-      - "5433:5432"
+        - 5432
     environment:
       POSTGRES_USER: 'postgres'
       POSTGRES_PASSWORD: 'postgres'
-      POSTGRES_DB: 'shop_db'
+      POSTGRES_DB: 'dev_db'
 
-  dbwarehouse:
-    container_name: dbwarehouse
+  db_warehouse:
+    container_name: db_warehouse
     image: postgres:latest
     volumes:
-      - db_warehouse-vol:/var/lib/postgresql/data
+      - db-warehouse-data:/var/lib/postgresql/data
     networks:
-      - db-to-warehouse
+      - warehouse_net
     expose:
       - 5432
-    ports:
-      - "5431:5432"
     environment:
       POSTGRES_USER: 'postgres1'
       POSTGRES_PASSWORD: 'postgres1'
       POSTGRES_DB: 'warehouse_db'
 
-networks:
-  net:
-  db-to-shop:
-  db-to-warehouse:
+  redis:
+    container_name: redis
+    image: redis:5.0.6-alpine
+    restart: on-failure
+    networks:
+      - webnet
+    expose:
+      - 6379
+    volumes:
+      - redis:/var/lib/redis/data
 
 volumes:
-  db_shop-vol:
-  db_warehouse-vol:
+  db-data:
+  db-warehouse-data:
+  redis:
+networks:
+  webnet:
+  warehouse_net:

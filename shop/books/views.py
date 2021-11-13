@@ -3,6 +3,7 @@ from django.urls import reverse_lazy
 from django.views import generic
 
 from .forms import RegisterForm
+from .models import Book, Genre
 
 
 class RegisterFormView(generic.FormView):
@@ -19,3 +20,14 @@ class RegisterFormView(generic.FormView):
         user = authenticate(username=username, password=password)
         login(self.request, user)
         return super(RegisterFormView, self).form_valid(form)
+
+
+class BooksView(generic.ListView):
+    model = Book
+    paginate_by = 20
+    template_name = 'books_list.html'
+
+
+class GenreView(generic.ListView):
+    model = Genre
+    template_name = 'genre_list.html'
